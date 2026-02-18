@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "organizer": {
+      "command": "python",
+      "args": ["/absolute/path/to/organizer-mcp-server/main.py"]
+    }
+  }
+}
