@@ -8,45 +8,39 @@ The Organizer MCP provides **AI-powered intelligent file organization** with con
 
 ### Core Features
 
-1. **Read File** - AI analyzes file content to understand context
-   - Read and extract semantic meaning from files
-   - Get full content for intelligent analysis
-   - Automatic encoding detection for text files
+1. **Scan Folder** - Get complete folder intelligence
+   - File statistics and composition
+   - Identify files needing attention
+   - Understand folder structure
 
-2. **Understand Context** - AI extracts meaning and purpose
-   - Analyze keywords and topics
-   - Understand relationships between files
-   - Identify file categories by actual content
-
-3. **Suggest Organization** - Dynamic folder creation based on intelligence
-   - AI creates folders based on CONTENT UNDERSTANDING, not templates
-   - Examples: "Q4_Financial_Reports", "Vacation_Photos_2024", "Project_Alpha_Documents"
-   - Smart grouping of related files
-   - Meaningful folder hierarchies
-
-4. **Organize Intelligently** - Execute AI's organization plan
-   - Move files to AI-created categories
-   - Create folder structures that make sense
-   - No predefined patterns or rigid rules
-
-5. **Find Duplicates** - Content-based duplicate detection
+2. **Find Duplicates** - Content-based duplicate detection
    - Identify exact duplicate files using hashing
    - Group identical files together
    - Calculate wasted disk space
 
-6. **Suggest Filenames** - Context-aware naming suggestions
+3. **Create Junk Folder** - Safe quarantine for unwanted files
+   - Move duplicates to a protected location
+   - Review before permanent deletion
+
+4. **Read File** - AI analyzes file content to understand context
+   - Read and extract semantic meaning from files
+   - Get full content for intelligent analysis
+   - Automatic encoding detection for text files
+
+5. **Suggest Filenames** - Context-aware naming suggestions
    - Extract key information from file content
    - Generate multiple meaningful options
    - Help rename generic files
 
-7. **Create Junk Folder** - Safe quarantine for unwanted files
-   - Move duplicates to a protected location
-   - Review before permanent deletion
+6. **Rename File** - Apply meaningful names to files
+   - Change generic names to descriptive ones
+   - Standardize naming conventions
+   - Prepare files for organization
 
-8. **Scan Folder** - Get complete folder intelligence
-   - File statistics and composition
-   - Identify files needing attention
-   - Understand folder structure
+7. **Organize Folder** - Execute AI's organization plan
+   - Move files to AI-created categories
+   - Create folder structures that make sense
+   - No predefined patterns or rigid rules
 
 ## 📋 How It Works - Intelligent Context-Based Organization
 
@@ -490,40 +484,28 @@ Parameters:
 
 ## 📚 Available Tools
 
-### `read_file`
-Read and analyze a file's content and metadata.
+### `scan_folder`
+Get complete analysis of a folder structure.
 
 **Parameters:**
-- `file_path` (string): Absolute path to the file
-- `max_size` (integer, default: 50000): Maximum bytes to read
+- `folder_path` (string): Folder to analyze
+- `include_hidden` (boolean, default: false): Include hidden files
 
 **Returns:**
 ```python
 {
-  "file_name": "document.pdf",
-  "file_path": "/full/path/document.pdf",
-  "size": 2048576,
-  "is_text": false,
-  "file_type": ".pdf",
-  "content": "Binary file - cannot display content",
-  "truncated": false
-}
-```
-
-### `rename_file`
-Rename a file to a more meaningful name.
-
-**Parameters:**
-- `file_path` (string): Absolute path to the file
-- `new_name` (string): New filename with extension
-
-**Returns:**
-```python
-{
-  "old_name": "Document1.pdf",
-  "new_name": "Q4_Financial_Report.pdf",
-  "old_path": "/path/Document1.pdf",
-  "new_path": "/path/Q4_Financial_Report.pdf"
+  "total_files": 250,
+  "total_folders": 45,
+  "total_size": 1073741824,
+  "file_types": [
+    {"extension": ".pdf", "count": 45, "total_size": 524288000},
+    {"extension": ".jpg", "count": 120, "total_size": 314572800}
+  ],
+  "duplicate_groups": 3,
+  "files_with_generic_names": 23,
+  "text_files": 85,
+  "binary_files": 165,
+  "hidden_files": 2
 }
 ```
 
@@ -552,6 +534,43 @@ Find duplicate files based on content hash.
 }
 ```
 
+### `create_junk_folder`
+Create a junk folder and move unwanted files into it.
+
+**Parameters:**
+- `folder_path` (string): Root folder where junk folder is created
+- `files_to_move` (array): List of file paths to move
+- `folder_name` (string, default: "_junk"): Junk folder name
+
+**Returns:**
+```python
+{
+  "junk_folder_path": "/path/_junk",
+  "files_moved": 5,
+  "total_size_moved": 52428800
+}
+```
+
+### `read_file`
+Read and analyze a file's content and metadata.
+
+**Parameters:**
+- `file_path` (string): Absolute path to the file
+- `max_size` (integer, default: 50000): Maximum bytes to read
+
+**Returns:**
+```python
+{
+  "file_name": "document.pdf",
+  "file_path": "/full/path/document.pdf",
+  "size": 2048576,
+  "is_text": false,
+  "file_type": ".pdf",
+  "content": "Binary file - cannot display content",
+  "truncated": false
+}
+```
+
 ### `suggest_filename`
 Generate intelligent filename suggestions based on content.
 
@@ -570,6 +589,23 @@ Generate intelligent filename suggestions based on content.
   ],
   "analysis": "Content-based suggestion from first line and keywords",
   "confidence": 0.75
+}
+```
+
+### `rename_file`
+Rename a file to a more meaningful name.
+
+**Parameters:**
+- `file_path` (string): Absolute path to the file
+- `new_name` (string): New filename with extension
+
+**Returns:**
+```python
+{
+  "old_name": "Document1.pdf",
+  "new_name": "Q4_Financial_Report.pdf",
+  "old_path": "/path/Document1.pdf",
+  "new_path": "/path/Q4_Financial_Report.pdf"
 }
 ```
 
@@ -606,48 +642,6 @@ Organize files into categories based on a provided map.
   ],
   "redirect_file_path": "/path/REDIRECT.txt",
   "summary": "Organized 3 files into 3 categories"
-}
-```
-
-### `create_junk_folder`
-Create a junk folder and move unwanted files into it.
-
-**Parameters:**
-- `folder_path` (string): Root folder where junk folder is created
-- `files_to_move` (array): List of file paths to move
-- `folder_name` (string, default: "_junk"): Junk folder name
-
-**Returns:**
-```python
-{
-  "junk_folder_path": "/path/_junk",
-  "files_moved": 5,
-  "total_size_moved": 52428800
-}
-```
-
-### `scan_folder`
-Get complete analysis of a folder structure.
-
-**Parameters:**
-- `folder_path` (string): Folder to analyze
-- `include_hidden` (boolean, default: false): Include hidden files
-
-**Returns:**
-```python
-{
-  "total_files": 250,
-  "total_folders": 45,
-  "total_size": 1073741824,
-  "file_types": [
-    {"extension": ".pdf", "count": 45, "total_size": 524288000},
-    {"extension": ".jpg", "count": 120, "total_size": 314572800}
-  ],
-  "duplicate_groups": 3,
-  "files_with_generic_names": 23,
-  "text_files": 85,
-  "binary_files": 165,
-  "hidden_files": 2
 }
 ```
 

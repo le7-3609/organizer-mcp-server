@@ -114,6 +114,7 @@ class OrganizerService:
 
             suggestions = []
             analysis = ""
+            keywords = []  # Initialize keywords for all file types
 
             if is_text_file(path):
                 try:
