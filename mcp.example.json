@@ -2,7 +2,10 @@
   "mcpServers": {
     "organizer": {
       "command": "python",
-      "args": ["/absolute/path/to/organizer-mcp-server/main.py"]
+      "args": ["/absolute/path/to/organizer-mcp-server/main.py"],
+      "env": {
+        "ORGANIZER_ALLOWED_PATHS": "C:/Users/YourName/Documents,C:/Users/YourName/Downloads"
+      }
     }
   }
 }
