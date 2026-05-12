@@ -108,7 +108,7 @@ class FileOperationsService:
             logger.info(f"File renamed: {path} -> {new_path}")
             return ToolResult(ok=True, data={"rename_info": rename_info.model_dump()})
 
-        except (FileAccessError, Exception) as e:
+        except Exception as e:
             logger.error(f"Error renaming file: {e}")
             return ToolResult(
                 ok=False,

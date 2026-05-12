@@ -18,7 +18,7 @@ from services.organizer_service import OrganizerService
 from services.file_operations_service import FileOperationsService
 from models.organizer_models import (
     OrganizeIn, ReadFileIn, RenameFileIn, FindDuplicatesIn,
-    SuggestNamesIn, CreateJunkFolderIn
+    SuggestNamesIn, CreateJunkFolderIn, ScanFolderIn
 )
 from models.result import ToolResult, ErrorInfo
 from utils import errors
@@ -41,6 +41,7 @@ Scan a folder and get complete analysis: file statistics, types, duplicates, and
 async def scan_folder(folder_path: str, include_hidden: bool = False) -> dict:
     """Scan and analyze a folder structure."""
     try:
+        _ = ScanFolderIn(folder_path=folder_path, include_hidden=include_hidden)
         res = await asyncio.to_thread(
             organizer_service.scan_folder,
             folder_path,

@@ -100,6 +100,23 @@ class SuggestNamesIn(BaseModel):
         return v
 
 
+class ScanFolderIn(BaseModel):
+    """Input for scan_folder tool."""
+    folder_path: str = Field(..., description="Absolute path to folder")
+    include_hidden: bool = Field(default=False)
+
+    @field_validator('folder_path')
+    @classmethod
+    def validate_folder_path(cls, v: str) -> str:
+        """Validate folder path exists."""
+        path = os.path.expanduser(v)
+        if not os.path.exists(path):
+            raise ValueError(f"Folder does not exist: {v}")
+        if not os.path.isdir(path):
+            raise ValueError(f"Path is not a directory: {v}")
+        return v
+
+
 class CreateJunkFolderIn(BaseModel):
     """Input for create_junk_folder tool."""
     folder_path: str = Field(..., description="Absolute path to folder")
