@@ -204,21 +204,37 @@ def sanitize_filename(filename: str) -> str:
     return filename
 
 
-def get_all_files(folder_path: Path, exclude_hidden: bool = True) -> List[Path]:
+def get_all_files(
+    folder_path: Path,
+    exclude_hidden: bool = True,
+    max_files: int = 10000,
+    max_depth: Optional[int] = None,
+) -> List[Path]:
     """Recursively get all files in a folder."""
     if not isinstance(folder_path, Path):
         folder_path = Path(folder_path)
 
-    files = []
-    try:
-        for item in folder_path.rglob('*'):
-            if item.is_file():
-                if exclude_hidden and item.name.startswith('.'):
-                    continue
-                files.append(item)
-    except PermissionError:
-        logger.warning(f"Permission denied accessing {folder_path}")
+    files: List[Path] = []
 
+    def _walk(directory: Path, depth: int) -> None:
+        if max_depth is not None and depth > max_depth:
+            return
+        if len(files) >= max_files:
+            return
+        try:
+            for entry in os.scandir(directory):
+                if len(files) >= max_files:
+                    return
+                if exclude_hidden and entry.name.startswith('.'):
+                    continue
+                if entry.is_file(follow_symlinks=False):
+                    files.append(Path(entry.path))
+                elif entry.is_dir(follow_symlinks=False):
+                    _walk(Path(entry.path), depth + 1)
+        except PermissionError:
+            logger.warning(f"Permission denied accessing {directory}")
+
+    _walk(folder_path, 0)
     return files
 
 

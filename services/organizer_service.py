@@ -12,9 +12,10 @@ from models.result import (
 )
 from utils import (
     validate_folder_path, validate_file_path, is_text_file, read_text_file,
-    calculate_file_hash, is_generic_filename, get_all_files,
+    calculate_file_hash, calculate_quick_hash, is_generic_filename, get_all_files,
     extract_keywords_from_content, sanitize_filename, is_hidden_file
 )
+from utils.file_utils import TEXT_EXTENSIONS
 from utils.errors import FolderAccessError
 import logging
 
@@ -45,13 +46,13 @@ class OrganizerService:
             folder = validate_folder_path(folder_path)
             result = DuplicatesResult(folder_path=str(folder), total_files=0)
 
-            # Group files by hash
-            hash_map: Dict[str, List[Path]] = defaultdict(list)
+            # Phase 1: group by (size, quick_hash) to avoid full hashing every file
+            size_map: Dict[int, List[Path]] = defaultdict(list)
 
             for file_path in get_all_files(folder, exclude_hidden=not include_hidden):
                 try:
                     result.total_files += 1
-                    
+
                     if not include_hidden and is_hidden_file(file_path):
                         continue
 
@@ -59,13 +60,25 @@ class OrganizerService:
                     if file_size < min_size:
                         continue
 
-                    file_hash = calculate_file_hash(file_path)
-                    if file_hash:
-                        hash_map[file_hash].append(file_path)
+                    size_map[file_size].append(file_path)
 
                 except Exception as e:
-                    logger.warning(f"Error hashing {file_path}: {e}")
+                    logger.warning(f"Error accessing {file_path}: {e}")
                     continue
+
+            # Phase 2: full hash only for files that share the same size
+            hash_map: Dict[str, List[Path]] = defaultdict(list)
+            for files_same_size in size_map.values():
+                if len(files_same_size) < 2:
+                    continue
+                for file_path in files_same_size:
+                    try:
+                        file_hash = calculate_file_hash(file_path)
+                        if file_hash:
+                            hash_map[file_hash].append(file_path)
+                    except Exception as e:
+                        logger.warning(f"Error hashing {file_path}: {e}")
+                        continue
 
             # Extract duplicate groups
             for file_hash, files in hash_map.items():
@@ -292,33 +305,36 @@ class OrganizerService:
                 total_size=0
             )
 
-            # Get all subdirectories
-            result.total_folders = len(list(folder.rglob('*/')))
-
-            # Collect file type statistics
+            # Collect file type statistics in a single pass (no byte I/O per file)
             type_stats: Dict[str, FileTypeStats] = {}
+            seen_dirs: set = set()
 
             for file_path in get_all_files(folder, exclude_hidden=not include_hidden):
                 try:
+                    # Count unique parent directories as a proxy for subfolder count
+                    parent = str(file_path.parent)
+                    if parent != str(folder):
+                        seen_dirs.add(parent)
+
                     result.total_files += 1
                     file_size = file_path.stat().st_size
                     result.total_size += file_size
 
-                    # Check file type
+                    # Check file type by extension only (no disk reads)
                     ext = file_path.suffix.lower() or "(no extension)"
-                    
+
                     if ext not in type_stats:
                         type_stats[ext] = FileTypeStats(
                             extension=ext,
                             count=0,
                             total_size=0
                         )
-                    
+
                     type_stats[ext].count += 1
                     type_stats[ext].total_size += file_size
 
-                    # Count text files
-                    if is_text_file(file_path):
+                    # Use extension-only text detection (no byte reading)
+                    if ext in TEXT_EXTENSIONS:
                         result.text_files += 1
                     else:
                         result.binary_files += 1
@@ -335,8 +351,9 @@ class OrganizerService:
                     logger.warning(f"Error scanning {file_path}: {e}")
                     continue
 
+            result.total_folders = len(seen_dirs)
             result.file_types = list(type_stats.values())
-            result.file_types.sort(key=lambda x: x.count, reverse=True)  # Sort by count
+            result.file_types.sort(key=lambda x: x.count, reverse=True)
 
             return ToolResult(ok=True, data={"scan": result.model_dump()})
 
