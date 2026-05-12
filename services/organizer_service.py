@@ -339,9 +339,13 @@ class OrganizerService:
                     else:
                         result.binary_files += 1
 
+                    # Track all file paths
+                    result.files.append(str(file_path))
+
                     # Check for generic names
                     if is_generic_filename(file_path.name):
                         result.files_with_generic_names += 1
+                        result.generic_name_files.append(str(file_path))
 
                     # Check for hidden files
                     if is_hidden_file(file_path):

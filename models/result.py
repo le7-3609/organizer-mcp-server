@@ -106,3 +106,5 @@ class FolderScanResult(BaseModel):
     text_files: int = Field(default=0)
     binary_files: int = Field(default=0)
     hidden_files: int = Field(default=0)
+    files: List[str] = Field(default_factory=list, description="Absolute paths of all files found")
+    generic_name_files: List[str] = Field(default_factory=list, description="Absolute paths of files with generic names")
