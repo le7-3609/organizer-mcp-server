@@ -2,6 +2,10 @@
 
 An MCP server that gives Claude the ability to intelligently organize your files — reading content, detecting duplicates, suggesting meaningful names, and moving files into logical folders.
 
+## 🎬 Demo
+
+[Watch the demo](mcp-orgenizer.mp4)
+
 ## Tools
 
 | Tool | Description |
@@ -85,3 +89,7 @@ npx @modelcontextprotocol/inspector python main.py
 ```
 
 Opens a web UI at `http://localhost:5173` where you can call every tool manually.
+
+## 📄 License
+
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
