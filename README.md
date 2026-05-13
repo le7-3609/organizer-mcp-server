@@ -92,4 +92,4 @@ Opens a web UI at `http://localhost:5173` where you can call every tool manually
 
 ## 📄 License
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+This project is licensed under the [MIT License](LICENSE).
